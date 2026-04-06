@@ -7,6 +7,8 @@ import { Server } from "socket.io";
 
 import userRoutes from "./routes/userRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
+import Message from "./models/Message.js";
 
 dotenv.config();
 
@@ -32,6 +34,7 @@ app.use(express.json());
 
 // ---------------- ROUTES ----------------
 app.use("/api/users", userRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/api/tasks", taskRoutes);
 
 // ---------------- TEST ROUTE ----------------
@@ -60,6 +63,18 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
   });
+});
+
+socket.on("sendMessage", async ({ taskId, message }) => {
+  // save in DB
+  const newMsg = await Message.create({
+    taskId,
+    sender: message.sender,
+    text: message.text,
+    time: message.time,
+  });
+
+  io.to(taskId).emit("receiveMessage", newMsg);
 });
 
 // ---------------- DATABASE ----------------
