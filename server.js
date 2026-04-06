@@ -23,9 +23,11 @@ const io = new Server(server, {
 });
 
 // ---------------- MIDDLEWARE ----------------
-app.use(cors({
-  origin: "*"
-}));
+app.use(
+  cors({
+    origin: "*",
+  }),
+);
 app.use(express.json());
 
 // ---------------- ROUTES ----------------
@@ -49,7 +51,10 @@ io.on("connection", (socket) => {
 
   // Send message
   socket.on("sendMessage", ({ taskId, message }) => {
-    io.to(taskId).emit("receiveMessage", message);
+    io.to(taskId).emit("receiveMessage", {
+      ...message,
+      taskId, // 🔥 include this
+    });
   });
 
   socket.on("disconnect", () => {
@@ -58,9 +63,10 @@ io.on("connection", (socket) => {
 });
 
 // ---------------- DATABASE ----------------
-mongoose.connect(process.env.MONGO_URI)
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.log(err));
+  .catch((err) => console.log(err));
 
 // ---------------- SERVER START ----------------
 const PORT = process.env.PORT || 5000;
