@@ -63,18 +63,18 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
   });
-});
 
-socket.on("sendMessage", async ({ taskId, message }) => {
-  // save in DB
-  const newMsg = await Message.create({
-    taskId,
-    sender: message.sender,
-    text: message.text,
-    time: message.time,
+  socket.on("sendMessage", async ({ taskId, message }) => {
+    // save in DB
+    const newMsg = await Message.create({
+      taskId,
+      sender: message.sender,
+      text: message.text,
+      time: message.time,
+    });
+
+    io.to(taskId).emit("receiveMessage", newMsg);
   });
-
-  io.to(taskId).emit("receiveMessage", newMsg);
 });
 
 // ---------------- DATABASE ----------------
