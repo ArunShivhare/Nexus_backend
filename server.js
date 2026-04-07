@@ -57,7 +57,7 @@ io.on("connection", (socket) => {
         taskId,
         sender: message.sender,
         text: message.text,
-        time: message.time,
+        time: new Date().toISOString(),
       });
 
       io.to(taskId).emit("receiveMessage", newMsg);
@@ -79,9 +79,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("markSeen", async ({ taskId }) => {
-    await Message.updateMany({ taskId, seen: false }, { seen: true });
+    await Message.updateMany({ taskId, seen: false }, { $set: { seen: true } });
 
-    io.to(taskId).emit("messagesSeen");
+    io.to(taskId).emit("messagesSeen", { taskId });
   });
 });
 
