@@ -69,6 +69,20 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("❌ User disconnected:", socket.id);
   });
+
+  socket.on("typing", ({ taskId, user }) => {
+    socket.to(taskId).emit("userTyping", user);
+  });
+
+  socket.on("stopTyping", ({ taskId }) => {
+    socket.to(taskId).emit("userStopTyping");
+  });
+
+  socket.on("markSeen", async ({ taskId }) => {
+    await Message.updateMany({ taskId, seen: false }, { seen: true });
+
+    io.to(taskId).emit("messagesSeen");
+  });
 });
 
 // ---------------- DATABASE ----------------
